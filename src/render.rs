@@ -1,7 +1,6 @@
 use std::path::Path;
 
 use image2::{transform, Image, ImageBuf, Rgb};
-use pixels::wgpu::Surface;
 use pixels::{Error, Pixels, SurfaceTexture};
 use winit::dpi::LogicalSize;
 use winit::event::{Event, VirtualKeyCode};
@@ -30,7 +29,7 @@ pub fn render(mut image: ImageBuf<u8, Rgb>, file: &Path) -> Result<(), Error> {
 
     event_loop.run(move |event, _, control_flow| match event {
                   Event::RedrawRequested(_) => {
-                      draw_pixels(pixels.get_frame(), &image);
+                      draw_pixels(pixels.frame_mut(), &image);
                       pixels.render();
                   }
                   _ => {
@@ -97,8 +96,7 @@ fn create_window(width: u32, height: u32, event_loop: &EventLoop<()>, file: &Pat
 }
 
 fn create_pixel_buffer(window: &Window, width: u32, height: u32) -> Pixels {
-    let surface = Surface::create(window);
-    let surface_texture = SurfaceTexture::new(width, height, surface);
+    let surface_texture = SurfaceTexture::new(width, height, window);
     Pixels::new(width, height, surface_texture).unwrap()
 }
 
@@ -118,5 +116,5 @@ fn resize_pixels(pixels: &mut Pixels, size: LogicalSize<f64>) {
     let new_width = size.width.round() as u32;
     let new_height = size.height.round() as u32;
 
-    pixels.resize(new_width, new_height);
+    pixels.resize_surface(new_width, new_height);
 }

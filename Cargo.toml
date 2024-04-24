@@ -1,6 +1,6 @@
 [package]
 name = "viewimg"
-version = "0.9.0"
+version = "0.10.0"
 authors = ["mandeep <mandeep@users.noreply.github.com>"]
 license = "MIT"
 edition = "2021"
@@ -14,7 +14,7 @@ readme = "README.md"
 clap = "2.33"
 exr = "1.72.0"
 image2 = "0.11.3"
-pixels = "0.0.2"
+pixels = "0.13.0"
 winit = "0.27"
 winit_input_helper = "0.13"
 rayon = "1.3.0"
