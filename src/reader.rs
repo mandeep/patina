@@ -1,50 +1,59 @@
 use std::path::Path;
 
-use exr::image::read_options;
-use exr::image::rgba::{Image, Pixels};
+use image2::Image;
 use image2::{io, ImageBuf, Rgb};
-use rayon::prelude::*;
+use exr::image::RgbChannels;
+use exr::prelude::{ReadLayers, ReadChannels};
 
-use crate::utils::compensate;
+// fn extract_exr_data(image: &Image<Layer<SpecificChannels<RgbaImage, RgbaChannels>>>) -> Vec<u8> {
+//     let (width, height) = (image.layer_data.size.0, image.layer_data.size.1);
 
-fn extract_exr_data(image: &Image) -> Vec<u8> {
-    let (width, height) = (image.resolution.0, image.resolution.1);
+//     let mut exr_data = vec![0u8; width as usize * height as usize * 3];
 
-    let mut exr_data = vec![0u8; width as usize * height as usize * 3];
 
-    exr_data.par_chunks_mut(3).enumerate().for_each(|(i, pixel)| {
-        let x = i % width as usize;
-        let y = i / width as usize;
-        let index = image.vector_index_of_first_pixel_component(exr::math::Vec2(x, y));
+//     exr_data.par_chunks_mut(3).enumerate().for_each(|(i, pixel)| {
+//         let x = i % width as usize;
+//         let y = i / width as usize;
 
-        let data: (f32, f32, f32) = match &image.data {
-            Pixels::F32(data) => (data[index + 0], data[index + 1], data[index + 2]),
-            Pixels::F16(data) => {
-                (data[index + 0].to_f32(), data[index + 1].to_f32(), data[index + 2].to_f32())
-            }
-            Pixels::U32(data) => {
-                (data[index + 0] as f32, data[index + 1] as f32, data[index + 2] as f32)
-            }
-        };
+//         let data: (f32, f32, f32, f32) = &image.layer_data;
 
-        pixel[0] = compensate(data.0);
-        pixel[1] = compensate(data.1);
-        pixel[2] = compensate(data.2);
-    });
+//         pixel[0] = compensate(data.0);
+//         pixel[1] = compensate(data.1);
+//         pixel[2] = compensate(data.2);
+//     });
 
-    exr_data
-}
+//     exr_data
+// }
+
 
 pub fn read_exr_image(filepath: &Path) -> Result<ImageBuf<u8, Rgb>, exr::error::Error> {
-    match Image::read_from_file(filepath, read_options::high()) {
-        Ok(exr_image) => {
-            let exr_data = extract_exr_data(&exr_image);
-            let exr_image_buffer: ImageBuf<u8, Rgb> =
-                ImageBuf::new_from(exr_image.resolution.0, exr_image.resolution.1, exr_data);
-            Ok(exr_image_buffer)
-        }
+    let reader = exr::image::read::read()
+    .no_deep_data()
+    .largest_resolution_level()
+    .rgb_channels(
+    |resolution, _channels: &RgbChannels| -> ImageBuf<u8, Rgb> {
+            ImageBuf::new(
+                resolution.width(),
+                resolution.height()
+            )
+        },
 
+        // set each pixel in the png buffer from the exr file
+        |png_pixels, position, (r, g, b): (f32, f32, f32)| { 
+            png_pixels.set_f(position.x(), position.y(), 0, r.into());
+            png_pixels.set_f(position.x(), position.y(), 1, g.into());
+            png_pixels.set_f(position.x(), position.y(), 2, b.into());
+        }
+    )
+    .first_valid_layer()
+    .all_attributes();
+
+    match reader.from_file(filepath) {
+        Ok(image) => {
+            Ok(image.layer_data.channel_data.pixels)
+        },
         Err(error) => Err(error),
+
     }
 }
 
@@ -55,3 +64,4 @@ pub fn read_hdr_image(filepath: &Path) -> Result<ImageBuf<u8, Rgb>, image2::Erro
         Err(error) => Err(error),
     }
 }
+

@@ -1,33 +1,15 @@
 #![allow(unused)]
 
-use exr::image::rgba::{Image, Pixels};
+use exr::image::Image;
 use exr::prelude::f16;
 
-pub fn find_min_max(image: &Image) -> (f32, f32) {
-    let min_max = match &image.data {
-        Pixels::F32(data) => (data.iter().cloned().fold(0.0 / 0.0, f32::min),
-                              data.iter().cloned().fold(0.0 / 0.0, f32::max)),
-        Pixels::F16(data) => {
-            let mut minimum = f16::MAX;
-            let mut maximum = f16::MIN;
+// pub fn find_min_max(image: &Image) -> (f32, f32) {
+//     let min_max = match &image.data {
+//         (data.iter().cloned().fold(0.0 / 0.0, f32::min), data.iter().cloned().fold(0.0 / 0.0, f32::max))
+//     }
 
-            for value in data {
-                if *value < minimum {
-                    minimum = *value;
-                } else if *value > maximum {
-                    maximum = *value;
-                }
-            }
-
-            (minimum.to_f32(), maximum.to_f32())
-        }
-        Pixels::U32(data) => {
-            ((*data.iter().min().unwrap()) as f32, (*data.iter().max().unwrap()) as f32)
-        }
-    };
-
-    min_max
-}
+//     min_max
+// }
 
 pub fn normalize_f32(value: f32, minimum: f32, maximum: f32) -> f32 {
     (value - minimum) / (maximum - minimum)

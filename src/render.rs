@@ -111,6 +111,7 @@ fn draw_pixels(frame: &mut [u8], image: &ImageBuf<u8, Rgb>) {
         let rgba = [image.get(x, y, 0), image.get(x, y, 1), image.get(x, y, 2), 255];
         pixel.copy_from_slice(&rgba);
     }
+    
 }
 
 fn resize_pixels(pixels: &mut Pixels, size: LogicalSize<f64>) {

@@ -1,9 +1,9 @@
 [package]
 name = "viewimg"
-version = "0.8.1"
+version = "0.9.0"
 authors = ["mandeep <mandeep@users.noreply.github.com>"]
 license = "MIT"
-edition = "2018"
+edition = "2021"
 description = "OpenEXR and HDR image viewer"
 homepage = "https://github.com/mandeep/viewimg"
 repository = "https://github.com/mandeep/viewimg"
@@ -12,7 +12,7 @@ readme = "README.md"
 
 [dependencies]
 clap = "2.33"
-exr = "=0.7.3"
+exr = "1.72.0"
 image2 = "0.11.3"
 pixels = "0.0.2"
 winit = "0.27"
